@@ -1,0 +1,19 @@
+{
+  "name": "scheduling-frontend",
+  "version": "1.0.0",
+  "description": "员工排班管理系统前端",
+  "scripts": {
+    "dev": "vue-cli-service serve --port 3425",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "axios": "^1.6.0",
+    "element-plus": "^2.4.4",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^5.0.8"
+  }
+}

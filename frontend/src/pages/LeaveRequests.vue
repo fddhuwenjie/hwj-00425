@@ -43,7 +43,7 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog title="提交请假申请" :visible.sync="showAddModal" width="500px">
+    <el-dialog title="提交请假申请" v-model="showAddModal" width="500px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="申请人" required>
           <el-select v-model="form.employee_id">

@@ -113,7 +113,8 @@ router.get('/export', (req, res) => {
       xlsx.utils.book_append_sheet(workbook, worksheet, '月度报表');
       
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=月度报表_${year}年${month}月.xlsx`);
+      const filename = encodeURIComponent(`月度报表_${year}年${month}月.xlsx`);
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}; filename*=UTF-8''${filename}`);
       res.send(xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' }));
     }
   );

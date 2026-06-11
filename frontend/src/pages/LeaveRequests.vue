@@ -7,7 +7,7 @@
       </el-button>
     </div>
 
-    <el-table :data="leaveRequests" border>
+    <el-table :data="leaveRequestsData" border>
       <el-table-column prop="employee_name" label="申请人" width="120" />
       <el-table-column prop="position" label="岗位" width="100" />
       <el-table-column prop="type" label="请假类型" width="100">
@@ -47,7 +47,7 @@
       <el-form :model="form" label-width="100px">
         <el-form-item label="申请人" required>
           <el-select v-model="form.employee_id">
-            <el-option v-for="emp in employees" :key="emp.id" :label="emp.name" :value="emp.id" />
+            <el-option v-for="emp in employeesData" :key="emp.id" :label="emp.name" :value="emp.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="请假类型" required>

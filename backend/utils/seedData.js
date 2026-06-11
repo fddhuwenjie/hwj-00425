@@ -18,6 +18,72 @@ const employees = [
   { name: '周十七', employee_id: 'EMP015', position: '厨房', group_id: 3, max_hours_per_week: 40, hourly_wage: 17, annual_leave_days: 15, unavailable_slots: '[]' }
 ];
 
+function generateSchedules() {
+  const schedules = [];
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  const cashiers = [1, 2, 3, 13];
+  const servers = [4, 5, 6, 7, 14];
+  const kitchen = [8, 9, 10, 15];
+  const managers = [11, 12];
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayOfWeek = new Date(year, month, day).getDay();
+    
+    const shiftAssignments = [
+      { shiftId: 1, positions: { '收银': 2, '服务': 2, '厨房': 2, '管理': 1 } },
+      { shiftId: 2, positions: { '收银': 3, '服务': 3, '厨房': 2, '管理': 1 } },
+      { shiftId: 3, positions: { '收银': 2, '服务': 2, '厨房': 2, '管理': 1 } }
+    ];
+    
+    shiftAssignments.forEach(assignment => {
+      Object.entries(assignment.positions).forEach(([position, count]) => {
+        let available = [];
+        if (position === '收银') available = cashiers.filter(id => canWorkOnDay(id, dayOfWeek, assignment.shiftId));
+        else if (position === '服务') available = servers.filter(id => canWorkOnDay(id, dayOfWeek, assignment.shiftId));
+        else if (position === '厨房') available = kitchen.filter(id => canWorkOnDay(id, dayOfWeek, assignment.shiftId));
+        else if (position === '管理') available = managers.filter(id => canWorkOnDay(id, dayOfWeek, assignment.shiftId));
+        
+        available.slice(0, count).forEach(empId => {
+          schedules.push({ employee_id: empId, shift_template_id: assignment.shiftId, date });
+        });
+      });
+    });
+  }
+  
+  return schedules;
+}
+
+function canWorkOnDay(empId, dayOfWeek, shiftId) {
+  const unavailableSlots = {
+    2: [2],
+    4: { day: 4, shift: [3] },
+    6: { day: 2, shift: [1] },
+    8: [4],
+    10: { day: 2, shift: [3] },
+    12: [2],
+    14: { day: 4, shift: [1] }
+  };
+  
+  const empUnavailable = unavailableSlots[empId];
+  if (!empUnavailable) return true;
+  
+  if (Array.isArray(empUnavailable)) {
+    return !empUnavailable.includes(dayOfWeek);
+  }
+  
+  if (empUnavailable.day === dayOfWeek) {
+    if (shiftId === 1 && empUnavailable.shift.includes(1)) return false;
+    if (shiftId === 3 && empUnavailable.shift.includes(3)) return false;
+  }
+  
+  return true;
+}
+
 const insertSeedData = () => {
   db.get('SELECT COUNT(*) as count FROM employees', (err, row) => {
     if (row.count === 0) {
@@ -28,6 +94,19 @@ const insertSeedData = () => {
         );
       });
       console.log('Seed employees inserted');
+    }
+  });
+  
+  db.get('SELECT COUNT(*) as count FROM schedules', (err, row) => {
+    if (row.count === 0) {
+      const schedules = generateSchedules();
+      schedules.forEach(schedule => {
+        db.run(
+          'INSERT INTO schedules (employee_id, shift_template_id, date, status) VALUES (?, ?, ?, ?)',
+          [schedule.employee_id, schedule.shift_template_id, schedule.date, 'confirmed']
+        );
+      });
+      console.log('Seed schedules inserted');
     }
   });
 };
